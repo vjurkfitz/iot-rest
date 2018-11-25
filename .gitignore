@@ -1,0 +1,9 @@
+
+dashboard/node_modules/
+dashboard/public/
+server/node_modules/
+server/public/
+simulator/node_modules/
+simulator/public/
+.npmrc
+iot-rest.code-workspace

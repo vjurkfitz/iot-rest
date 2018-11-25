@@ -1,0 +1,45 @@
+@import "../node_modules/bootstrap-sass/assets/stylesheets/bootstrap.scss";
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,700');
+
+$icon-font-path: "/assets/bootstrap-sass/assets/fonts/bootstrap/" !default;
+
+$dark-grey: #3f4147;
+
+*:not(.fa):not(.glyphicon):not(i) {
+	font-family: 'Roboto', sans-serif;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;		// Safari
+}
+
+body {
+    .dashboard {
+        max-width: 720px;
+
+        @media screen and (min-width: 720px) {
+            margin: 20px auto;
+        }
+        
+        border: solid 1px $dark-grey;
+
+        .row:not(:last-child) {
+            border-bottom: solid 1px $dark-grey;
+        }
+
+        .main-title {
+            background-color: $dark-grey;
+            color: #fff;
+            font-size: 32px;
+        }
+
+        .column-titles {
+            background-color: #ccc;
+            font-size: 16px;
+            padding: 0.5em 0;
+        }
+
+        .row-entries {
+            padding: 8px 0;
+            background-color: #e9e9e9;
+        }
+    }
+}

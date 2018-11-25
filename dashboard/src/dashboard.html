@@ -1,0 +1,54 @@
+<!doctype html>
+<html ng-app="app">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="fragment" content="!">
+	<title>IOT Rest Client - Devices Dashboard</title>
+
+    <base href="/">
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/angular/angular.min.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+
+
+	<!--  App -->
+	<script src="public/js/app.min.js"></script>
+	<link href="public/css/app.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard container" ng-controller="DashboardController as controller">
+        <div class="row main-title">
+            <div class="col-xs-12">
+                <h3>Devices</h3>
+            </div>
+        </div>
+        <div class="row column-titles hidden-xs">
+            <div class="col-sm-2">
+                ID
+            </div>
+            <div class="col-sm-5">
+                Name
+            </div>
+            <div class="col-sm-5">
+                State
+            </div>
+        </div>
+        <div class="row row-entries" ng-repeat="device in devices">
+            <div class="col-xs-12 col-sm-2">
+                <label class="visible-xs-inline">ID: </label>{{ device.ID }}
+            </div>
+            <div class="col-xs-12 col-sm-5">
+                <label class="visible-xs-inline">Name: </label>{{ device.name }}
+            </div>
+            <div class="col-xs-12 col-sm-5">
+                <label class="visible-xs-inline">State: </label>{{ device.state }}
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

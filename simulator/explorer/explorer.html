@@ -1,0 +1,62 @@
+<!doctype html>
+<html ng-app="app">
+
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	<meta name="fragment" content="!">
+	<title>IOT Rest Client - Simulator - Explorer</title>
+
+    <base href="/">
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/angular/angular.min.js"></script>
+
+
+	<!--  App -->
+	<script src="public/js/app.min.js"></script>
+	<link href="public/css/app.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="explorer" ng-controller="ExplorerController as controller">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12">
+                    <p>Page created to test all routes visually.<br>
+                    Routes are also available through curl. </p>
+                </div>
+            </div>
+        </div>
+
+        <form ng-repeat="action in actions" name="{{action.response + '_form'}}"
+            ng-submit="action.submit()">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xs-12 main-title">
+                        {{ action.title }}
+                    </div>
+                </div>
+                <div class="row" ng-repeat="(name,field) in action.fields">
+                    <div class="col-xs-12 form-group">
+                        <label>{{ field.title }}</label>
+                        <input type="text" ng-if="field.type === 'text'" ng-model="field.model" class="form-control" required>
+                        <textarea ng-if="field.type === 'textarea'" ng-model="field.model" class="form-control" required></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-if="responses[action.response]">
+                    <div class="col-xs-12">
+                        {{ responses[action.response] }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <button class="btn btn-default pull-right" type="submit">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
