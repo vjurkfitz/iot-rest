@@ -24,7 +24,7 @@ app.use(function(req, res, next) {
  *  If device with that ID doesn't exist in the database, returns error.
  */
 app.param('id', function (req, res, next, id) {
-  pool.query('SELECT ID, name, state FROM devices WHERE id=' + pool.escape(id), function(error, results) {
+  pool.query('SELECT ID, name FROM devices WHERE ID = ' + pool.escape(id), function(error, results) {
     if (error) {
       res.status(500).send(error);
       return next(error);
@@ -42,6 +42,30 @@ app.param('id', function (req, res, next, id) {
   })
 });
 
+/**
+ *  Define sId parameter for all routes.
+ *  Queries database to check that sensor exists before continuing with the function.
+ *  If a sensor with that ID doesn't exist in the database, returns error.
+ */
+app.param('sId', function (req, res, next, sId) {
+  pool.query('SELECT ID, name, state, deviceId FROM sensors WHERE ID =' + pool.escape(sId), function(error, results) {
+    if (error) {
+      res.status(500).send(error);
+      return next(error);
+    };
+
+    if ((results || []).length !== 1) {
+      var err = new Error('Invalid sensor ID');
+      res.status(400).send(err);
+      return next(err);
+    }
+
+    req.sensor = results[0];
+
+    next();
+  })
+});
+
 // ROUTES ******************************** 
 
 /**
@@ -49,10 +73,37 @@ app.param('id', function (req, res, next, id) {
  *  @return         array    Data of all devices in the DB
  */
 app.get('/devices/all', function(req, res) {
-  pool.query('SELECT * FROM devices', function(error, results) {
+  var sql = "SELECT d.ID, d.name, GROUP_CONCAT(CONCAT(s.ID, '|', s.name, '|', s.state)) AS sensors " +
+            "FROM devices d LEFT JOIN sensors s ON d.ID = s.deviceId " +
+            "GROUP BY d.ID, d.name";
+  
+  pool.query(sql, function(error, results) {
     if (error) {
       return res.status(500).send(error);
     }
+
+    results = results.reduce(function(arr, curr) {
+      if (!curr.sensors) {
+          curr.sensors = [];
+      }
+      else {
+          var s = curr.sensors.split(',').reduce(function(sArr, sCurr) {
+              var split = sCurr.split('|') || [];
+              sArr.push({
+                  ID: split[0] || '',
+                  name: split[1] || '',
+                  state: split[2] || ''
+              })
+
+              return sArr;
+          }, []);
+
+          curr.sensors = s;
+      }
+      arr.push(curr);
+      return arr;
+    }, []);
+
     return res.status(200).send(results);
   })
 })
@@ -72,11 +123,11 @@ app.get('/devices/:id/check', function(req, res) {
  *  @return         string    Status of the queried device
  */
 app.get('/devices/:id/sensor/:sId', function(req, res) {
-  if (req.device) {
-    return res.status(200).send(req.device.state);
+  if (req.sensor) {
+    return res.status(200).send(req.sensor.state);
   }
 
-  res.status(404).send('Device was not found.');
+  res.status(404).send('Sensor was not found.');
 })
 
 /**
@@ -91,17 +142,29 @@ app.get('/devices/:id/sensor/:sId', function(req, res) {
  */
 app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
   console.log("SERVER: CREATE");
-  var data  = req.body || {};
-  var state = data.state || 'ACTIVE';
-  var name  = data.name || 'NO_NAME';
+  var data      = req.body || {};
+  var name      = data.name || 'NO_NAME';
+  var sensors   = data.sensors || [];
 
-  pool.query('INSERT INTO devices SET ?', { state: state, name: name }, function(error, results) {
+  pool.query('INSERT INTO devices SET ?', { name: name }, function(error, results) {
     if (error) {
       return res.status(500).send(error);
     }
 
-    request('http://localhost:3100/update-devices', function(error, response) {
-      res.status(200).send('INSERTED: ' + results.insertId);
+    var deviceId = results.insertId;
+    var toAddSensors = sensors.reduce(function(arr, curr) {
+      arr.push([ curr.name, curr.state, deviceId ]);
+      return arr;
+    }, [])
+
+    pool.query('INSERT INTO sensors (name, state, deviceId) VALUES ?', [toAddSensors], function(error, results2) {
+      if (error) {
+        return res.status(500).send(error);
+      }
+
+      request('http://localhost:3100/update-devices', function(error, response) {
+        res.status(200).send('INSERTED: ' + deviceId);
+      })
     })
   })
 })
@@ -113,7 +176,7 @@ app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
  *  @param    id    int       ID of device that will be updated
  *  @return         string    Information about updated device: new state and affected rows
  */
-app.post('/devices/:id/update', bodyParser.json({type: '*/*'}), function(req, res) {
+app.post('/devices/:id/sensors/:sId/update', bodyParser.json({type: '*/*'}), function(req, res) {
   console.log("SERVER: UPDATE");
   var data = req.body || {};
 
@@ -125,7 +188,7 @@ app.post('/devices/:id/update', bodyParser.json({type: '*/*'}), function(req, re
     return res.status(404).send('Device not found');
   }
 
-  pool.query('UPDATE devices SET state = ? WHERE ID = ?', [ data.state, req.params.id ], function(error, results) {
+  pool.query('UPDATE sensors SET state = ? WHERE ID = ?', [ data.state, req.params.sId ], function(error, results) {
     if (error) {
       return res.status(500).send(error);
     }
