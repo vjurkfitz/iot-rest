@@ -19,13 +19,6 @@ app.get('/', function(req, res) {
 	res.sendFile(path.join(__dirname + '/src/dashboard.html'));
 });
 
-io.on('connection', function (socket) {
-	socket.emit('news', { hello: 'world' });
-	socket.on('my other event', function (data) {
-	  console.log(data);
-	});
-});
-
 app.get('/update-devices', function(req, res) {
 	io.emit('update-devices', 'all sockets');
 	res.status(200).send('Updated');
