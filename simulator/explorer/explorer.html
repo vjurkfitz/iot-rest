@@ -36,17 +36,26 @@
                     <div class="col-xs-12 main-title">
                         {{ action.title }}
                     </div>
+                    <div class="col-xs-12" style="padding-bottom: 1em">
+                        curl --request {{ action.response === 'delete' ? 'DELETE' : 'POST' }} -d "{{ action.fields.data.model | json }}" {{ action.url.replace(':id', action.fields.id.model).replace(':sId', action.fields.sId.model)}}
+                    </div>
                 </div>
                 <div class="row" ng-repeat="(name,field) in action.fields">
                     <div class="col-xs-12 form-group">
                         <label>{{ field.title }}</label>
-                        <input type="text" ng-if="field.type === 'text'" ng-model="field.model" class="form-control" required>
-                        <textarea ng-if="field.type === 'textarea'" ng-model="field.model" class="form-control" required></textarea>
+                        <input type="text" ng-if="field.type === 'text'" placeholder="int" ng-model="field.model" class="form-control" required>
+                        <textarea placeholder="JSON" ng-if="field.type === 'textarea'" ng-model="field.model" class="form-control" required></textarea>
+                    </div>
+                </div>
+                <div class="row" ng-if="!!action.example">
+                    <div class="col-xs-12">
+                        Data example: {{ action.example }}
                     </div>
                 </div>
                 <div class="row" ng-if="responses[action.response]">
                     <div class="col-xs-12">
-                        {{ responses[action.response] }}
+                        Status: {{ responses[action.response].status }}<br>
+                        Response: {{ responses[action.response].body }}
                     </div>
                 </div>
                 <div class="row">

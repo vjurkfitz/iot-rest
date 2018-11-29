@@ -25,10 +25,31 @@ app.param('id', function (req, res, next, id) {
 			return next(error);
 		}
 
-		console.log("body: ", body);
-		console.log("type: ", typeof body);
 		if (!(body || {}).check) {
 			var err = new Error('Device not found');
+			res.status(404).send(err);
+			return next(err);
+		}
+
+		next();
+	})
+});
+
+/**
+ *  Define sID parameter for all routes.
+ *  Queries with server to check that sensor exists before continuing with the function.
+ *  If sensor with that ID doesn't exist in the server, returns error.
+ */
+app.param('sId', function (req, res, next, sId) {
+	var url = API + '/sensors/' + sId + '/check';
+	request(url, { json: true }, function(error, response, body) {
+		if (error) {
+			res.status(500).send(error);
+			return next(error);
+		}
+
+		if (!(body || {}).check) {
+			var err = new Error('Sensor not found');
 			res.status(404).send(err);
 			return next(err);
 		}
@@ -49,7 +70,6 @@ app.param('id', function (req, res, next, id) {
  *  @return         int     ID of inserted device
  */
 app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
-	console.log("SIMULATOR: CREATE");
 	var url = API + '/create';
 
 	request.post(url, { form: JSON.stringify(req.body) }, function(error, response) {
@@ -61,15 +81,15 @@ app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
 })
 
 /**
- *  POST device update
- *  Updates device state. State data should be sent through request body in json format.
+ *  POST sensor update
+ *  Updates sensor state. State data should be sent through request body in json format.
  *  Example: curl --request POST -d "{\"state\":\"INACTIVE\"}" localhost:3100/devices/2/update
- *  @param    id    int       ID of device that will be updated
- *  @return         string    Information about updated device: new state and affected rows
+ *  @param		id		int		ID of device that will be updated
+ * 	@param 		sId		int		ID of sensor that will be updated
+ *  @return				string	Information about updated sensor: new state and affected rows
  */
-app.post('/devices/:id/update', bodyParser.json({type: '*/*'}), function(req, res) {
-	console.log("SIMULATOR: UPDATE");
-	var url = API + '/' + req.params.id + '/update';
+app.post('/devices/:id/sensors/:sId/update', bodyParser.json({type: '*/*'}), function(req, res) {
+	var url = API + '/' + req.params.id + '/sensors/' + req.params.sId + '/update';
 	request.post(url, { form: JSON.stringify(req.body) }, function(error, response) {
 		if (error) {
 			return res.status(500).send(error);
@@ -84,7 +104,6 @@ app.post('/devices/:id/update', bodyParser.json({type: '*/*'}), function(req, re
  *  @return         string    Message with information about deleted device.
  */
 app.delete('/devices/:id/delete', function(req, res) {
-	console.log("SIMULATOR: DELETE");
 	var url = API + '/' + req.params.id + '/delete';
 	request.delete(url, function(error, response) {
 		if (error) {

@@ -118,6 +118,16 @@ app.get('/devices/:id/check', function(req, res) {
 })
 
 /**
+ *  GET sensor check 
+ *  @param    id    int       Device ID
+ *  @param    sId   int       Sensor ID
+ *  @return         boolean   Whether sensor exists or not
+ */
+app.get('/devices/sensors/:sId/check', function(req, res) {
+  return res.status(200).send({ check: !!req.sensor });
+})
+
+/**
  *  GET device state 
  *  @param    id    int       Device ID
  *  @return         string    Status of the queried device
@@ -141,7 +151,6 @@ app.get('/devices/:id/sensor/:sId', function(req, res) {
  *  @return         int     ID of inserted device
  */
 app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
-  console.log("SERVER: CREATE");
   var data      = req.body || {};
   var name      = data.name || 'NO_NAME';
   var sensors   = data.sensors || [];
@@ -177,7 +186,6 @@ app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
  *  @return         string    Information about updated device: new state and affected rows
  */
 app.post('/devices/:id/sensors/:sId/update', bodyParser.json({type: '*/*'}), function(req, res) {
-  console.log("SERVER: UPDATE");
   var data = req.body || {};
 
   if (!data.state) {
@@ -205,7 +213,6 @@ app.post('/devices/:id/sensors/:sId/update', bodyParser.json({type: '*/*'}), fun
  *  @return         string    Message with information about deleted device.
  */
 app.delete('/devices/:id/delete', function(req, res) {
-  console.log("SERVER: DELETE");
   if (!req.device) {
     return res.status(404).send('Device not found');
   }
