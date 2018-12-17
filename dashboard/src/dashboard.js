@@ -30,15 +30,27 @@
         }
     })
 
-    .service("DataService", function ($http) {
+    .service("DataService", function ($http, $q) {
         var self = this;
 
-        var baseUrl = 'http://localhost:3000/devices';
+        var server  = null;
 
         self.getDevices = function() {
-            return $http.get(baseUrl + '/all').then(function(res) {
-                return (res || {}).data || [];
-            });
+
+            var def = $q.defer();
+            if (!server) {
+                $http.get('/config').then(function(res) {
+                    server = ((res || {}).data || {}).server || 'http://localhost';
+                    def.resolve(self.getDevices());
+                })
+            }
+            else {
+                $http.get(server +  '/devices/all').then(function(res) {
+                    def.resolve((res || {}).data || []);
+                })
+            }
+
+            return def.promise;
         }
     })
     

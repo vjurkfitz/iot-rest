@@ -1,0 +1,9 @@
+set -x
+docker run \
+--name iot-simulator \
+-p 3200:3200 \
+-e IOT_SERVER=http://${DOCKER_HOST_IP}:3000 \
+-e HOST=${DOCKER_HOST_IP} \
+-d \
+iot-rest/simulator:latest
+

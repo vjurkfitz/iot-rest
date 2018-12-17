@@ -7,7 +7,7 @@
     .service("DataService", function ($http) {
         var self = this;
 
-        var baseUrl = 'http://localhost:3200/devices';
+        var baseUrl = '/devices';
 
         self.createDevice = function(data) {
             var url = baseUrl + "/create";
@@ -35,15 +35,19 @@
     
     .controller("ExplorerController", function($scope, DataService) {
         
-        var u = 'BL"U"ULB';
-        u = u.replace(/"/g, '\\"');
-        console.log("u: ", u);
         $scope.responses = {};
-        var baseUrl = 'http://localhost:3200/devices';
+        var baseUrl = '/devices';
 
+        /**
+         * 
+         *  @param  {object}    data            Data to be inserted
+         *  @param  {string}    data.name       Name of the device that will be inserted
+         *  @param  {object[]}  data.sensors    Data for sensors that belong to this device
+         *  @param  {string}    sensor.name     Sensor name
+         *  @param  {string}    sensor.state    Sensor state
+         */
         function createDevice(data) {
             DataService.createDevice(data).then(function(res) {
-                console.log("res: ", res);
                 $scope.responses.create = {
                     status: res.status,
                     body: (res.data || {}).body
@@ -51,6 +55,14 @@
             })
         }
 
+        /**
+         *  Updates a device's sensor based on its ID.
+         *  @param  {num}     id            Device ID
+         *  @param  {num}     sId           Sensor ID
+         *  @param  {object}  data          Data to be updated
+         *  @param  {string=} data.name     New name for the sensor
+         *  @param  {string=} data.state    New state for the sensor 
+         */
         function updateDevice(id, sId, data) {
             DataService.updateDevice(id, sId, data).then(function(res) {
                 $scope.responses.update = {
@@ -60,6 +72,11 @@
             })
         }
 
+        /**
+         *  Deletes a device based on its ID. 
+         *  All device sensors are deleted as well.
+         *  @param  {num}   id      Device ID
+         */
         function deleteDevice(id) {
             DataService.deleteDevice(id).then(function(res) {
                 $scope.responses.delete = {
@@ -69,6 +86,7 @@
             })
         }
 
+        // Actions that can be performed in the explorer.
         $scope.actions = [
             {
                 title: 'Create Device',

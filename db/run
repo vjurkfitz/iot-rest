@@ -1,0 +1,8 @@
+set -x
+docker run \
+--name iot-db \
+-p 3306:3306 \
+-e MYSQL_ROOT_PASSWORD=12345678 \
+-d \
+iot-rest/db:latest
+

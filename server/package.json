@@ -7,8 +7,11 @@
     "type": "git",
     "url": "git@github.com:vjurkfitz/iot-rest.git"
   },
+  "scripts": {
+    "start": "node ."
+  },
   "author": "Victoria Jurkfitz <vjurkfitz@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "UNLICENSED",
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.14.0",

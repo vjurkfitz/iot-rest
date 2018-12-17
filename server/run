@@ -1,0 +1,14 @@
+set -x
+docker run \
+--name iot-server \
+--link iot-db \
+-p 3000:3000 \
+-e DB_HOSTNAME=${DOCKER_HOST_IP} \
+-e DB_DATABASE=iot \
+-e DB_PASSWORD=12345678 \
+-e DB_USERNAME=root \
+-e IOT_DASHBOARD_URL=http://${DOCKER_HOST_IP}:3100 \
+-e HOST=${DOCKER_HOST_IP} \
+-d \
+iot-rest/server:latest
+

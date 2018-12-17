@@ -4,7 +4,7 @@ var request 	= require('request');
 var bodyParser 	= require('body-parser');
 var app			= express();
 
-const API 		= 'http://localhost:3000/devices';
+const API 		= process.env.IOT_SERVER + '/devices';
 
 app.use(function(req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
@@ -125,7 +125,7 @@ app.get('/explorer', function(req, res) {
  *  Start listening
  */
 app.listen('3200', function() {
-  console.log('App running at http://localhost:3200');
+  console.log('App running at http://' + process.env.HOST + ':3200');
 })
 
 module.exports = app

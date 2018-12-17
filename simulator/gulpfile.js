@@ -27,6 +27,7 @@ var paths = {
 };
 
 gulp.task("default", ["watch", "scss", "js"]);
+gulp.task("compile", ["scss", "js"]);
 
 gulp.task("scss", function (done) {
 	gulp.src(paths.scss.source).on("error", log.error)

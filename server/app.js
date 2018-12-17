@@ -4,12 +4,20 @@ var mysql       = require('mysql');
 var request     = require('request');
 var app         = express();
 
+var host        = process.env.HOST;
+
+var dbHost      = process.env.DB_HOSTNAME;
+var dbUser      = process.env.DB_USERNAME;
+var dbPassword  = process.env.DB_PASSWORD;
+var db          = process.env.DB_DATABASE;
+var dashUrl     = process.env.IOT_DASHBOARD_URL;
+
 var pool = mysql.createPool({
   connectionLimit : 10,
-  host            : 'localhost',
-  user            : 'root',
-  password        : '12345',
-  database        : 'iot'
+  host            : dbHost,
+  user            : dbUser,
+  password        : dbPassword,
+  database        : db
 });
 
 app.use(function(req, res, next) {
@@ -75,7 +83,8 @@ app.param('sId', function (req, res, next, sId) {
 app.get('/devices/all', function(req, res) {
   var sql = "SELECT d.ID, d.name, GROUP_CONCAT(CONCAT(s.ID, '|', s.name, '|', s.state)) AS sensors " +
             "FROM devices d LEFT JOIN sensors s ON d.ID = s.deviceId " +
-            "GROUP BY d.ID, d.name";
+            "GROUP BY d.ID, d.name " +
+            "ORDER BY s.modified DESC";
   
   pool.query(sql, function(error, results) {
     if (error) {
@@ -171,7 +180,7 @@ app.post('/devices/create', bodyParser.json({type: '*/*'}), function(req, res) {
         return res.status(500).send(error);
       }
 
-      request('http://localhost:3100/update-devices', function(error, response) {
+      request(dashUrl + '/update-devices', function(error, response) {
         res.status(200).send('INSERTED: ' + deviceId);
       })
     })
@@ -201,7 +210,7 @@ app.post('/devices/:id/sensors/:sId/update', bodyParser.json({type: '*/*'}), fun
       return res.status(500).send(error);
     }
 
-    request('http://localhost:3100/update-devices', function(error, response) {
+    request(dashUrl + '/update-devices', function(error, response) {
       res.status(200).send('Device was updated. New state: ' + data.state + '. Affected rows: ' + results.changedRows);
     })
   })
@@ -222,7 +231,7 @@ app.delete('/devices/:id/delete', function(req, res) {
       return res.status(500).send(error);
     }
 
-    request('http://localhost:3100/update-devices', function(error, response) {
+    request(dashUrl + '/update-devices', function(error, response) {
       res.status(200).send('Deleted device. ID: ' + req.params.id);
     })
   })
@@ -232,7 +241,7 @@ app.delete('/devices/:id/delete', function(req, res) {
  *  Start listening
  */
 app.listen('3000', function() {
-  console.log('App running at http://localhost:3000');
+  console.log('App running at http://' + host + ':3000');
 })
 
 module.exports = app

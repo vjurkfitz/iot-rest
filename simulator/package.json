@@ -11,11 +11,9 @@
     "url": "git@github.com:vjurkfitz/iot-rest.git"
   },
   "author": "Victoria Jurkfitz <vjurkfitz@gmail.com>",
-  "license": "Apache-2.0",
+  "license": "UNLICENSED",
   "scripts": {
-    "lint": "eslint .",
-    "start": "node .",
-    "posttest": "npm run lint && nsp check"
+    "start": "gulp compile && node ."
   },
   "dependencies": {
     "angular": "^1.7.5",

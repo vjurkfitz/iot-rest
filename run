@@ -1,0 +1,16 @@
+set -x
+export DOCKER_HOST_IP=$(docker-machine ip)
+
+cd ./db 
+./build
+./run
+cd ../server
+./build
+./run
+cd ../dashboard
+./build
+./run
+cd ../simulator
+./build
+./run
+cd ..
